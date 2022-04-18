@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BoardMapper">
+	<insert id="insert" parameterType="dto.Board">
+	<!-- insert 문 전에  board의 bnum 필드의 setter 실행 -->
+  		<selectKey keyProperty="bnum" resultType="int" order="BEFORE">
+  			select s_bnum.nextval from dual
+  		</selectKey>
+	insert into board(bnum,userid,subject,content,ip)
+    values(#{bnum},#{userid},#{subject},#{content},#{ip})
+	</insert>
+	
+	<update id="update">
+	update board 
+    set userid =#{userid},
+    subject =#{subject},
+    content =#{content},
+    ip =#{ip}
+    where bnum =#{bnum}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM board
+        WHERE bnum= #{bnum}
+	</delete>
+	
+	<!-- dto의 경로명까지 포함해서 resultType 매핑  -->
+	<select id="selectOne" resultType="dto.Board">
+	
+	
+	
+		SELECT * FROM board
+        where bnum = #{bnum}
+	</select>
+	
+	
+	<select id="selectList" resultType="dto.Board">
+	select*
+      from(select rownum rnum, b.*
+        from(select * from board
+             where ${findkey} like '%' || #{findvalue} || '%'
+             order by bnum desc) b) 
+             where rnum between #{startnum} and #{endnum}
+	</select>
+	
+	<update id="readcnt">
+	update board
+    set readcnt = readcnt +1
+    where bnum =#{bnum}
+	</update>
+	
+	<!-- 전체게시물 수  -->
+	<select id="select_totalcnt" resultType="int">
+	select count(*) totalcnt from board
+    where ${findkey} like '%' || #{findvalue} || '%'
+	</select>
+
+</mapper>
